@@ -17,7 +17,7 @@ const pool = new Pool({
 app.get('/pets', (req, res) => {
   pool.query('SELECT * FROM pets', (err, data) => {
     if (err) {
-      console.log(err.stack);
+      res.status(404).send("Resource doesn't exist.")
     }
     res.status(200).send(data.rows);
   })
@@ -27,7 +27,7 @@ app.get('/pets/:id', (req, res) => {
   const id = req.params.id;
   pool.query(`SELECT * FROM pets WHERE id = '${id}'`, (err, data) => {
     if (err) {
-      console.log(err.stack);
+      res.status(404).send("Resource doesn't exist.")
     }
     res.status(200).send(data.rows[0]);
   })
@@ -36,8 +36,12 @@ app.get('/pets/:id', (req, res) => {
 app.post('/pets', (req, res) => {
   const age = Number.parseInt(req.body.age);
   const {name, kind} = req.body;
-  pool.query(`INSERT INTO pets (age, kind, name) VALUES ('${age}', '${kind}', '${name}')`);
-  res.sendStatus(202);
+  pool.query(`INSERT INTO pets (age, kind, name) VALUES ('${age}', '${kind}', '${name}')`, (err) => {
+    if (err) {
+      res.status(500).send('Post failed!')
+    }
+    res.sendStatus(202);
+  });
 })
 
 app.patch('/pets/:id', (req, res) => {
@@ -46,7 +50,11 @@ app.patch('/pets/:id', (req, res) => {
   const column = Object.keys(update)[0];
   const value = Object.values(update)[0];
   console.log(column, value);
-  pool.query(`UPDATE pets SET ${column} = '${value}' WHERE id = ${id}`);
+  pool.query(`UPDATE pets SET ${column} = '${value}' WHERE id = ${id}`, (err) => {
+    if (err) {
+      res.status(500).send('Update failed!')
+    }
+  });
   res.sendStatus(202);
 })
 
@@ -54,7 +62,7 @@ app.delete('/pets/:id', (req, res) => {
   const id = req.params.id;
   pool.query(`SELECT * FROM pets WHERE id = '${id}'`, (err, data) => {
     if (err) {
-      console.log(err.stack);
+      res.status(404).send("Resource doesn't exist.")
     }
     const deleted = data.rows[0];
     delete deleted.id;
