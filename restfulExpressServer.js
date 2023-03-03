@@ -29,18 +29,18 @@ app.get('/pets/:id', (req, res) => {
     if (err) {
       console.log(err.stack)
     }
-    res.status(200).send(data.rows)
+    res.status(200).send(data.rows[0])
   })
 })
 
-// app.post('/pets', (req, res) => {
-//   const age = Number.parseInt(req.body.age)
-//   const {name, kind} = req.body
-//   const newPet = { name, kind, age }
+app.post('/pets', (req, res) => {
+  const age = Number.parseInt(req.body.age)
+  const {name, kind} = req.body
+  pool.query(`INSERT INTO pets (age, kind, name) VALUES ('${age}', '${kind}', '${name}')`)
+  res.sendStatus(202)
+})
 
-// })
-
-// app.patch()
+// app.patch('/pets/:id', (req, res))
 
 // app.delete()
 
