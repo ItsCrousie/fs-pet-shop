@@ -1,35 +1,44 @@
 import express from 'express';
-import fs from 'fs';
+import pg from 'pg';
 
 const app = express();
 const port = 3000;
 app.use(express.json());
 
+const { Pool } = pg;
+const pool = new Pool({
+  host: '127.0.0.1',
+  port: '5432',
+  database: 'petshop',
+  user: 'postgres',
+  password: 'password'
+})
+
 app.get('/pets', (req, res) => {
-  fs.readFile('pets.json', 'utf8', (err, petsJSON) => {
-    const pets = JSON.parse(petsJSON)
-    res.status(200).send(pets);
+  pool.query('SELECT * FROM pets', (err, data) => {
+    if (err) {
+      console.log(err.stack)
+    }
+    res.status(200).send(data.rows)
   })
 });
 
-// app.get()
-
-app.post('/pets', (req, res) => {
-  const age = Number.parseInt(req.body.age)
-  const {name, kind} = req.body
-  const newPet = { name, kind, age }
-
-  fs.readFile('pets.json', 'utf8', (err, petsJSON) => {
-    let pets = JSON.parse(petsJSON);
-    console.log(pets)
-    pets.indexOf(newPet) === -1
-    ? pets.push(newPet)
-    : res.status(409).send(`${newPet.name} already exists. :)`)
-    // fs.writeFile('pets.json', data, () => {
-    //   res.status(202).send('Accepted!')
-    // });
+app.get('/pets/:id', (req, res) => {
+  const id = req.params.id
+  pool.query(`SELECT * FROM pets WHERE id = '${id}'`, (err, data) => {
+    if (err) {
+      console.log(err.stack)
+    }
+    res.status(200).send(data.rows)
   })
 })
+
+// app.post('/pets', (req, res) => {
+//   const age = Number.parseInt(req.body.age)
+//   const {name, kind} = req.body
+//   const newPet = { name, kind, age }
+
+// })
 
 // app.patch()
 
