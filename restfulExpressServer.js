@@ -43,14 +43,25 @@ app.post('/pets', (req, res) => {
 app.patch('/pets/:id', (req, res) => {
   const id = req.params.id;
   const update = req.body;
-  const column = Object.keys(update)[0]
-  const value = Object.values(update)[0]
-  console.log(column, value)
-  pool.query(`UPDATE pets SET ${column} = '${value}' WHERE id = ${id}`)
-  res.sendStatus(202)
+  const column = Object.keys(update)[0];
+  const value = Object.values(update)[0];
+  console.log(column, value);
+  pool.query(`UPDATE pets SET ${column} = '${value}' WHERE id = ${id}`);
+  res.sendStatus(202);
 })
 
-// app.delete()
+app.delete('/pets/:id', (req, res) => {
+  const id = req.params.id;
+  pool.query(`SELECT * FROM pets WHERE id = '${id}'`, (err, data) => {
+    if (err) {
+      console.log(err.stack);
+    }
+    const deleted = data.rows[0];
+    delete deleted.id;
+    pool.query(`DELETE FROM pets WHERE id = ${id}`);
+    res.status(200).send(deleted);
+  })
+})
 
 app.listen(port,() => {
   console.log(`Listening on port ${port}`)
