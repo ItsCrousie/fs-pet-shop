@@ -2,8 +2,11 @@ import express from 'express';
 import pg from 'pg';
 
 const app = express();
-const port = 3000;
+const port = 1337;
 app.use(express.json());
+app.listen(port,() => {
+  console.log(`Listening on port ${port}`)
+});
 
 const { Pool } = pg;
 const pool = new Pool({
@@ -19,7 +22,7 @@ app.get('/pets', (req, res) => {
     if (err) {
       res.status(404).send("Resource doesn't exist.")
     }
-    res.status(200).send(data.rows);
+    return res.status(200).send(data.rows);
   })
 });
 
@@ -70,7 +73,3 @@ app.delete('/pets/:id', (req, res) => {
     res.status(200).send(deleted);
   })
 })
-
-app.listen(port,() => {
-  console.log(`Listening on port ${port}`)
-});
